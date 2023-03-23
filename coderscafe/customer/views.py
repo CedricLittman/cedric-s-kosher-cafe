@@ -66,6 +66,7 @@ class Order(View):
 
 from django.shortcuts import render
 from django.views import View
+from django.core.mail import send_mail 
 from .models import MenuItem, OrderModel
 
 
@@ -120,8 +121,29 @@ class Order(View):
             price += item['price']
             item_ids.append(item['id'])
 
+        order = OrderModel.objects.create(
+            price = price,
+            name = name,
+            email = email,
+            street = street,
+            city = city,
+            state = state,
+            postcode = postcode
+        )
+
         order = OrderModel.objects.create(price=price)
         order.items.add(*item_ids)
+
+        #Confirmation email sent to console
+        body = (Thank you for your order. f'Your total is {price}')
+
+        send_mail(
+            'Many thanks for your order, we really yppreciate being eble to serve you',
+            body,
+            'joe@message.com',
+            [email],
+            fail_silently = False
+        )
 
         context = {
             'items': order_items['items'],
